@@ -4,15 +4,15 @@ import(
 	"sync"
 )
 type Crawler struct {
-    SeedURL string,
-    Workers int,
-    Queue   *URLQueue,
-    Visited map[string]struct{},
-	mu sync.Mutex,
+    SeedURL string
+    Workers int
+    Queue   *URLQueue
+    Visited map[string]struct{}
+	mu sync.Mutex
 }
 func New(s string,w int)*Crawler{
 	return &Crawler{
-		SeedURl:s,
+		SeedURL:s,
 		Workers:w,
 	}
 }
@@ -25,9 +25,14 @@ func (c *Crawler)Start(){
 	var wg sync.WaitGroup
 
 	c.Visited[c.SeedURL] = struct{}{}
-	for i:=1;i<=c.Workers;i++{
-		go Crawling(i,c.Queue.URLs,c.&mu,&wg)
+	for i:=0;i<c.Workers;i++{
+		wg.Add(1)
+		go Crawling(i,c.Queue.URLs,&c.mu,&wg)
 	}
-	c.mu.Lock()
+	
+		c.Queue.URLs<-c.SeedURL
+	
+   wg.Wait()
+	
 }
 
